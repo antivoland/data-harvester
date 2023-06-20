@@ -26,6 +26,8 @@
         <java.version>17</java.version>
 
         <okhttp-eventsource.version>4.1.0</okhttp-eventsource.version>
+        <jackson.version>2.15.2</jackson.version>
+        <lombok.version>1.18.28</lombok.version>
 
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
@@ -38,6 +40,21 @@
             <groupId>com.launchdarkly</groupId>
             <artifactId>okhttp-eventsource</artifactId>
             <version>${okhttp-eventsource.version}</version>
+        </dependency>
+
+        <!-- https://github.com/FasterXML/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- https://github.com/projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
