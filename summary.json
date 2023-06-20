@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "user": {
+        "id": "john.smith",
+        "first_name": "John",
+        "last_name": "Smith",
+        "age": 101,
+        "events": [
+          {
+            "id": "b8df2a4d-51e8-4df0-aaaa-87c7afa983c3",
+            "name": "stream-finished",
+            "datetime": "20-06-2023 09:27:40.456",
+            "show_id": "s7",
+            "show_title": "Vvhulz Taves Omerica",
+            "show_cast_1st": "Wason Pomoa"
+          }
+        ]
+      }
+    }
+  ],
+  "showsIn2020OrLater": 123,
+  "runtimeDurationMillis": 15000,
+  "successfulEvents": 1000,
+  "percentageOfStartedStreamEvents": 0.31415
+}
