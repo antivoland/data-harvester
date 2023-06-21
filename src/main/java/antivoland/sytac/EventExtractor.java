@@ -4,16 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 @Slf4j
 class EventExtractor {
-    private final PlatformWorkerFactory factory;
+    private final PlatformWorkerFactory workerFactory;
 
-    EventExtractor(PlatformWorkerFactory factory) {
-        this.factory = factory;
+    EventExtractor(PlatformWorkerFactory workerFactory) {
+        this.workerFactory = workerFactory;
     }
 
-    void extract(List<String> platforms, EventHandler handler, long timeoutMillis) {
+    void extract(List<String> platforms, EventHandler eventHandler, long timeoutMillis) {
         final var timer = new Thread(() -> {
             try {
                 Thread.sleep(timeoutMillis);
@@ -22,7 +23,7 @@ class EventExtractor {
                 Thread.currentThread().interrupt();
             }
         });
-        var workers = factory.newWorkers(platforms, wrapHandler(handler, timer));
+        var workers = workerFactory.newWorkers(platforms, wrapEventHandler(eventHandler, timer), errorHandler(timer));
         workers.forEach(PlatformWorker::run);
         timer.start();
         try {
@@ -33,15 +34,22 @@ class EventExtractor {
         workers.forEach(PlatformWorker::close);
     }
 
-    private static EventHandler wrapHandler(EventHandler handler, Thread timer) {
+    private static Consumer<Event> wrapEventHandler(EventHandler eventHandler, Thread timer) {
         final var sytacOccurrences = new AtomicInteger();
         return event -> {
             if (event.getPayload() == null) return; // skip malformed events
-            handler.handle(event);
+            eventHandler.handle(event);
             if (event.getPayload().isSytacUser() && sytacOccurrences.incrementAndGet() >= 3) {
-                timer.interrupt();
                 log.info("Sytac user occurred {} times", sytacOccurrences.get());
+                timer.interrupt();
             }
+        };
+    }
+
+    private static Consumer<Throwable> errorHandler(Thread timer) {
+        return error -> {
+            log.info("Failed to process events", error);
+            timer.interrupt();
         };
     }
 }

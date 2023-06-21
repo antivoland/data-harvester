@@ -11,6 +11,7 @@ import reactor.core.Disposable;
 import java.io.Closeable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 @Slf4j
 class PlatformWorker implements Runnable, Closeable {
@@ -18,16 +19,21 @@ class PlatformWorker implements Runnable, Closeable {
     private static final ObjectMapper MAPPER = JsonMapper.builder().build();
 
     private final String platform;
-    private final ClientFactory factory;
-    private final EventHandler handler;
+    private final ClientFactory clientFactory;
+    private final Consumer<Event> eventHandler;
+    private final Consumer<Throwable> errorHandler;
     private Disposable client;
     private final Lock lock = new ReentrantLock();
     private boolean closed;
 
-    PlatformWorker(String platform, ClientFactory factory, EventHandler handler) {
+    PlatformWorker(String platform,
+                   ClientFactory clientFactory,
+                   Consumer<Event> eventHandler,
+                   Consumer<Throwable> errorHandler) {
         this.platform = platform;
-        this.factory = factory;
-        this.handler = handler;
+        this.clientFactory = clientFactory;
+        this.eventHandler = eventHandler;
+        this.errorHandler = errorHandler;
     }
 
     @Override
@@ -36,7 +42,12 @@ class PlatformWorker implements Runnable, Closeable {
         try {
             if (closed) return;
             if (client != null) return;
-            client = factory.spec(platform).bodyToFlux(TYPE_REF).subscribe(this::handle);
+            client = clientFactory
+                    .spec(platform)
+                    .bodyToFlux(TYPE_REF)
+                    .map(this::extractEvent)
+                    .doOnError(Throwable.class, errorHandler)
+                    .subscribe(eventHandler);
         } finally {
             lock.unlock();
         }
@@ -55,22 +66,17 @@ class PlatformWorker implements Runnable, Closeable {
         }
     }
 
-    private void handle(ServerSentEvent<String> event) {
-        handler.handle(extract(event));
-
-    }
-
-    private Event extract(ServerSentEvent<String> event) {
+    private Event extractEvent(ServerSentEvent<String> event) {
         return Event
                 .builder()
                 .id(event.id())
                 .name(event.event())
                 .platform(platform)
-                .payload(parse(event.data()))
+                .payload(parseEventData(event.data()))
                 .build();
     }
 
-    private static Event.Payload parse(String data) {
+    private static Event.Payload parseEventData(String data) {
         try {
             return MAPPER.readValue(data, Event.Payload.class);
         } catch (JsonProcessingException e) {

@@ -1,19 +1,24 @@
 package antivoland.sytac;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 class PlatformWorkerFactory {
-    private final ClientFactory factory;
+    private final ClientFactory clientFactory;
 
-    PlatformWorkerFactory(ClientFactory factory) {
-        this.factory = factory;
+    PlatformWorkerFactory(ClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
     }
 
-    PlatformWorker newWorker(String platform, EventHandler handler) {
-        return new PlatformWorker(platform, factory, handler);
+    PlatformWorker newWorker(String platform,
+                             Consumer<Event> eventHandler,
+                             Consumer<Throwable> errorHandler) {
+        return new PlatformWorker(platform, clientFactory, eventHandler, errorHandler);
     }
 
-    List<PlatformWorker> newWorkers(List<String> platforms, EventHandler handler) {
-        return platforms.stream().map(platform -> newWorker(platform, handler)).toList();
+    List<PlatformWorker> newWorkers(List<String> platforms,
+                                    Consumer<Event> eventHandler,
+                                    Consumer<Throwable> errorHandler) {
+        return platforms.stream().map(platform -> newWorker(platform, eventHandler, errorHandler)).toList();
     }
 }
