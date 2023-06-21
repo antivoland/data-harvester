@@ -3,6 +3,7 @@ package antivoland.sytac;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.codec.ServerSentEvent;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 @Slf4j
 class PlatformWorker implements Runnable, Closeable {
     private static final ParameterizedTypeReference<ServerSentEvent<String>> TYPE_REF = new ParameterizedTypeReference<>() {};
-    private static final ObjectMapper MAPPER = JsonMapper.builder().build();
+    private static final ObjectMapper MAPPER = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
     private final String platform;
     private final ClientFactory clientFactory;

@@ -9,19 +9,21 @@ import java.util.List;
 
 @SpringBootApplication
 public class DataHarvester implements CommandLineRunner, EventHandler {
-
+    @Override
+    public void run(String... args) {
+        var clientFactory = new ClientFactory("http://localhost:8080", args[0], args[1]);
+        var workerFactory = new PlatformWorkerFactory(clientFactory);
+        var extractor = new EventExtractor(workerFactory);
+        var view = new AggregatedView();
+        long startMillis = System.currentTimeMillis();
+        extractor.extract(List.of("sytflix", "sytazon", "sysney"), view::register, 1000);
+        view.runtimeDurationMillis = System.currentTimeMillis() - startMillis;
+        view.print();
+    }
 
     @Override
     public void handle(Event event) {
         System.out.println(event); // TODO: handle the event
-    }
-
-    @Override
-    public void run(String... args) {
-        var clientFactory = new ClientFactory(args[0], args[1]);
-        var workerFactory = new PlatformWorkerFactory(clientFactory);
-        var extractor = new EventExtractor(workerFactory);
-        extractor.extract(List.of("sytflix", "sytazon", "sysney"), this, 200000);
     }
 
     public static void main(String[] args) {

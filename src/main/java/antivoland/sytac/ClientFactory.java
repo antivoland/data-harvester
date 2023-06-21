@@ -5,19 +5,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Base64;
 
 class ClientFactory {
+    private final String uri;
     private final String authHeaderValue;
 
-    ClientFactory(final String user, final String pass) {
-        authHeaderValue = authHeaderValue(user, pass);
+    ClientFactory(final String uri, final String user, final String pass) {
+        this.uri = uri;
+        this.authHeaderValue = authHeaderValue(user, pass);
     }
 
     WebClient.ResponseSpec spec(final String platform) {
-        return WebClient
-                .create("http://localhost:8080")
-                .get()
-                .uri(platform)
-                .header("Authorization", authHeaderValue)
-                .retrieve();
+        return WebClient.create(uri).get().uri(platform).header("Authorization", authHeaderValue).retrieve();
     }
 
     private static String authHeaderValue(String user, String pass) {
