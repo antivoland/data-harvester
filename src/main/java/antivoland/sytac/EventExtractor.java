@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @Slf4j
 class EventExtractor {
@@ -14,7 +13,8 @@ class EventExtractor {
         this.workerFactory = workerFactory;
     }
 
-    void extract(List<String> platforms, EventHandler eventHandler, long timeoutMillis) {
+    AggregatedView extract(List<String> platforms, long timeoutMillis) {
+        long startMillis = System.currentTimeMillis();
         final var timer = new Thread(() -> {
             try {
                 Thread.sleep(timeoutMillis);
@@ -23,33 +23,45 @@ class EventExtractor {
                 Thread.currentThread().interrupt();
             }
         });
-        var workers = workerFactory.newWorkers(platforms, wrapEventHandler(eventHandler, timer), errorHandler(timer));
-        workers.forEach(PlatformWorker::run);
         timer.start();
+
+        var view = new AggregatedView();
+        var workers = workerFactory.newWorkers(platforms, listener(view, timer));
+        workers.forEach(PlatformWorker::run);
+
         try {
             timer.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
         workers.forEach(PlatformWorker::close);
+        view.runtimeDurationMillis = System.currentTimeMillis() - startMillis;
+        return view;
     }
 
-    private static Consumer<Event> wrapEventHandler(EventHandler eventHandler, Thread timer) {
+    private static PlatformWorker.Listener listener(AggregatedView view, Thread timer) {
         final var sytacOccurrences = new AtomicInteger();
-        return event -> {
-            if (event.getPayload() == null) return; // skip malformed events
-            eventHandler.handle(event);
-            if (event.getPayload().isSytacUser() && sytacOccurrences.incrementAndGet() >= 3) {
-                log.info("Sytac user occurred {} times", sytacOccurrences.get());
+        return new PlatformWorker.Listener() {
+            @Override
+            public void onEvent(Event event) {
+                view.register(event);
+                if (event.payload != null && event.payload.isSytacUser() && sytacOccurrences.incrementAndGet() >= 3) {
+                    log.info("Sytac user occurred {} times", sytacOccurrences.get());
+                    timer.interrupt();
+                }
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                log.error("Failed to process events", error);
                 timer.interrupt();
             }
-        };
-    }
 
-    private static Consumer<Throwable> errorHandler(Thread timer) {
-        return error -> {
-            log.info("Failed to process events", error);
-            timer.interrupt();
+            @Override
+            public void onSuccessfulStreamingEvent() {
+                view.incrementSuccessfulStreamingEvents();
+            }
         };
     }
 }

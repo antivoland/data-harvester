@@ -1,6 +1,7 @@
 package antivoland.sytac;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,6 +25,10 @@ public class AggregatedView {
     long runtimeDurationMillis;
     long successfulStreamingEvents;
     double percentageOfStartedStreamEvents;
+    @JsonIgnore
+    private long startedStreamEvents;
+    @JsonIgnore
+    private long totalEvents;
 
     @SneakyThrows
     synchronized void print() {
@@ -31,13 +36,20 @@ public class AggregatedView {
     }
 
     synchronized void register(antivoland.sytac.Event event) {
-        if (event.payload == null) return;
-        var user = registerUser(event.payload.user);
-        user.registerEvent(event);
-        if (event.payload.show.release_year >= 2020) {
-            ++showsReleasedIn2020OrLater; // TODO: the condition in unclear
+        if (event.payload != null) {
+            var user = registerUser(event.payload.user);
+            user.registerEvent(event);
+            if (event.payload.show.release_year >= 2020) {
+                ++showsReleasedIn2020OrLater; // TODO: the condition is unclear
+            }
         }
-        // TODO: successfulStreamingEvents, percentageOfStartedStreamEvents
+        if (antivoland.sytac.Event.STREAM_STARTED.equals(event.name)) ++startedStreamEvents;
+        ++totalEvents;
+        percentageOfStartedStreamEvents = (double) startedStreamEvents / totalEvents;
+    }
+
+    synchronized void incrementSuccessfulStreamingEvents() {
+        ++successfulStreamingEvents;
     }
 
     private User registerUser(antivoland.sytac.Event.User user) {

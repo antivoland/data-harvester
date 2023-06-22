@@ -10,15 +10,11 @@ class PlatformWorkerFactory {
         this.clientFactory = clientFactory;
     }
 
-    PlatformWorker newWorker(String platform,
-                             Consumer<Event> eventHandler,
-                             Consumer<Throwable> errorHandler) {
-        return new PlatformWorker(platform, clientFactory, eventHandler, errorHandler);
+    PlatformWorker newWorker(String platform, PlatformWorker.Listener listener) {
+        return new PlatformWorker(platform, clientFactory, listener);
     }
 
-    List<PlatformWorker> newWorkers(List<String> platforms,
-                                    Consumer<Event> eventHandler,
-                                    Consumer<Throwable> errorHandler) {
-        return platforms.stream().map(platform -> newWorker(platform, eventHandler, errorHandler)).toList();
+    List<PlatformWorker> newWorkers(List<String> platforms, PlatformWorker.Listener listener) {
+        return platforms.stream().map(platform -> newWorker(platform, listener)).toList();
     }
 }

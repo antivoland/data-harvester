@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -20,6 +21,15 @@ class Event {
     final static String STREAM_INTERRUPTED = "stream-interrupted";
 
     private static final ZoneId AMSTERDAM_TIMEZONE = ZoneId.of("Europe/Amsterdam");
+
+    static boolean isSuccessfulStreamingEvent(Event a, Event b) {
+        if (a == null || b == null) return false;
+        if (a.payload == null || b.payload == null) return false;
+        return Objects.equals(a.platform, b.platform)
+                && Event.STREAM_STARTED.equals(a.name)
+                && Event.STREAM_FINISHED.equals(b.name)
+                && Objects.equals(a.payload.show.show_id, b.payload.show.show_id);
+    }
 
     String id;
     String name;

@@ -1,5 +1,6 @@
 package antivoland.sytac;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,6 +8,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import java.util.List;
 
+@Slf4j
 @SpringBootApplication
 public class DataHarvester implements CommandLineRunner, EventHandler {
     @Override
@@ -14,10 +16,7 @@ public class DataHarvester implements CommandLineRunner, EventHandler {
         var clientFactory = new ClientFactory("http://localhost:8080", args[0], args[1]);
         var workerFactory = new PlatformWorkerFactory(clientFactory);
         var extractor = new EventExtractor(workerFactory);
-        var view = new AggregatedView();
-        long startMillis = System.currentTimeMillis();
-        extractor.extract(List.of("sytflix", "sytazon", "sysney"), view::register, 1000);
-        view.runtimeDurationMillis = System.currentTimeMillis() - startMillis;
+        var view = extractor.extract(List.of("sytflix", "sytazon", "sysney"), 20000);
         view.print();
     }
 
