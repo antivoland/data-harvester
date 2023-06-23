@@ -25,7 +25,8 @@ class Event {
     static boolean isSuccessfulStreamingEvent(Event a, Event b) {
         if (a == null || b == null) return false;
         if (a.payload == null || b.payload == null) return false;
-        return Objects.equals(a.platform, b.platform)
+        return Objects.equals(a.payload.user.id, b.payload.user.id)
+                && Objects.equals(a.platform, b.platform)
                 && Event.STREAM_STARTED.equals(a.name)
                 && Event.STREAM_FINISHED.equals(b.name)
                 && Objects.equals(a.payload.show.show_id, b.payload.show.show_id);
@@ -35,6 +36,10 @@ class Event {
     String name;
     String platform;
     Payload payload;
+
+    boolean isSytacUser() {
+        return payload != null && payload.isSytacUser();
+    }
 
     @Data
     @Builder

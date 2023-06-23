@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-class EventExtractor {
+class Aggregator {
     private final PlatformWorkerFactory workerFactory;
 
-    EventExtractor(PlatformWorkerFactory workerFactory) {
+    Aggregator(PlatformWorkerFactory workerFactory) {
         this.workerFactory = workerFactory;
     }
 
-    AggregatedView extract(List<String> platforms, long timeoutMillis) {
+    AggregatedView aggregate(List<String> platforms, long timeoutMillis) {
         long startMillis = System.currentTimeMillis();
         final var timer = new Thread(() -> {
             try {
@@ -22,20 +22,18 @@ class EventExtractor {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        });
+        }, "timer");
         timer.start();
 
         var view = new AggregatedView();
         var workers = workerFactory.newWorkers(platforms, listener(view, timer));
-        workers.forEach(PlatformWorker::run);
-
+        workers.forEach(PlatformWorker::start);
         try {
             timer.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-
-        workers.forEach(PlatformWorker::close);
+        workers.forEach(PlatformWorker::stop);
         view.runtimeDurationMillis = System.currentTimeMillis() - startMillis;
         return view;
     }
@@ -46,21 +44,24 @@ class EventExtractor {
             @Override
             public void onEvent(Event event) {
                 view.register(event);
-                if (event.payload != null && event.payload.isSytacUser() && sytacOccurrences.incrementAndGet() >= 3) {
-                    log.info("Sytac user occurred {} times", sytacOccurrences.get());
-                    timer.interrupt();
-                }
             }
 
             @Override
-            public void onError(Throwable error) {
-                log.error("Failed to process events", error);
+            public void onSytacUserEvent() {
+                if (sytacOccurrences.incrementAndGet() < 3) return;
+                log.info("Sytac user occurred {} times", sytacOccurrences.get());
                 timer.interrupt();
             }
 
             @Override
-            public void onSuccessfulStreamingEvent() {
-                view.incrementSuccessfulStreamingEvents();
+            public void onSuccessfulStreamingEvent(Event.User user) {
+                view.incrementSuccessfulStreamingEvents(user);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                log.error("Failed to process events: {}", error.getMessage());
+                timer.interrupt();
             }
         };
     }

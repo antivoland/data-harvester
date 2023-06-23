@@ -26,8 +26,8 @@ class EventExtractorTest {
         final AtomicInteger cnt = new AtomicInteger();
         var clientFactory = new ClientFactory("http://localhost:" + port, null, null);
         var workerFactory = new PlatformWorkerFactory(clientFactory);
-        var extractor = new EventExtractor(workerFactory);
-        extractor.extract(List.of("persons", "persons"), event -> {
+        var extractor = new Aggregator(workerFactory);
+        extractor.aggregate(List.of("persons", "persons"), event -> {
             System.out.println(cnt.incrementAndGet() + ": " + event);
         }, 10000);
     }

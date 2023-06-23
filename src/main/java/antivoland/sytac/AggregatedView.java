@@ -23,7 +23,6 @@ public class AggregatedView {
     final Map<String, User> users = new HashMap<>();
     long showsReleasedIn2020OrLater;
     long runtimeDurationMillis;
-    long successfulStreamingEvents;
     double percentageOfStartedStreamEvents;
     @JsonIgnore
     private long startedStreamEvents;
@@ -48,8 +47,9 @@ public class AggregatedView {
         percentageOfStartedStreamEvents = (double) startedStreamEvents / totalEvents;
     }
 
-    synchronized void incrementSuccessfulStreamingEvents() {
-        ++successfulStreamingEvents;
+    synchronized void incrementSuccessfulStreamingEvents(antivoland.sytac.Event.User user) {
+        var view = registerUser(user);
+        ++view.successfulStreamingEvents;
     }
 
     private User registerUser(antivoland.sytac.Event.User user) {
@@ -70,6 +70,7 @@ public class AggregatedView {
         String name;
         int age;
         final Map<String, Event> events = new HashMap<>();
+        long successfulStreamingEvents;
 
         private void registerEvent(antivoland.sytac.Event event) {
             var view = events.get(event.id);
