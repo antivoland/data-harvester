@@ -109,10 +109,10 @@ class Event {
         LocalDate date_of_birth;
         String email;
         String first_name;
+        String last_name;
         String gender;
         String ip_address;
         String country;
-        String last_name;
 
         boolean isSytac() {
             return "Sytac".equals(first_name);

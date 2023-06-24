@@ -1,5 +1,6 @@
 package antivoland.sytac;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Base64;
@@ -14,7 +15,7 @@ class ClientFactory {
     }
 
     WebClient.ResponseSpec spec(final String platform) {
-        return WebClient.create(uri).get().uri(platform).header("Authorization", authHeaderValue).retrieve();
+        return WebClient.create(uri).get().uri(platform).header(HttpHeaders.AUTHORIZATION, authHeaderValue).retrieve();
     }
 
     private static String authHeaderValue(String user, String pass) {

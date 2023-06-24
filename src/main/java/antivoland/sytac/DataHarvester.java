@@ -16,7 +16,7 @@ public class DataHarvester implements CommandLineRunner {
         var clientFactory = new ClientFactory("http://localhost:8080", args[0], args[1]);
         var workerFactory = new PlatformWorkerFactory(clientFactory);
         var aggregator = new Aggregator(workerFactory);
-        var view = aggregator.aggregate(List.of("sytflix", "sytazon", "sysney"), 3000);
+        var view = aggregator.aggregate(List.of("sytflix", "sytazon", "sysney"), 30000);
         view.print();
     }
 

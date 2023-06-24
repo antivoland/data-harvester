@@ -2,6 +2,7 @@ package antivoland.sytac;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,7 +14,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -21,30 +24,40 @@ public class AggregatedView {
     private static final ObjectMapper MAPPER = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
     final Map<String, User> users = new HashMap<>();
-    long showsReleasedIn2020OrLater;
+    @JsonIgnore
+    private final Set<String> showsReleasedIn2020OrLater = new HashSet<>();
     long runtimeDurationMillis;
-    double percentageOfStartedStreamEvents;
     @JsonIgnore
-    private long startedStreamEvents;
+    private long sytflixStartedStreamEvents;
     @JsonIgnore
-    private long totalEvents;
+    private long sytflixTotalEvents;
+
+    @JsonProperty
+    double getSytflixPercentageOfStartedStreamEvents() {
+        return (double) sytflixStartedStreamEvents / sytflixTotalEvents;
+    }
+
+    @JsonProperty
+    public long getShowsReleasedIn2020OrLater() {
+        return showsReleasedIn2020OrLater.size();
+    }
 
     @SneakyThrows
     synchronized void print() {
         System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(this));
     }
 
-    synchronized void register(antivoland.sytac.Event event) {
-        if (event.payload != null) {
-            var user = registerUser(event.payload.user);
-            user.registerEvent(event);
-            if (event.payload.show.release_year >= 2020) {
-                ++showsReleasedIn2020OrLater; // TODO: the condition is unclear
-            }
+    synchronized void registerEvent(antivoland.sytac.Event event) {
+        if (event.payload == null) return;
+        var user = registerUser(event.payload.user);
+        user.registerEvent(event);
+        if (event.payload.show.release_year >= 2020) {
+            showsReleasedIn2020OrLater.add(event.payload.show.show_id);
         }
-        if (antivoland.sytac.Event.STREAM_STARTED.equals(event.name)) ++startedStreamEvents;
-        ++totalEvents;
-        percentageOfStartedStreamEvents = (double) startedStreamEvents / totalEvents;
+        if ("sytflix".equals(event.platform)) {
+            if (antivoland.sytac.Event.STREAM_STARTED.equals(event.name)) ++sytflixStartedStreamEvents;
+            ++sytflixTotalEvents;
+        }
     }
 
     synchronized void incrementSuccessfulStreamingEvents(antivoland.sytac.Event.User user) {
