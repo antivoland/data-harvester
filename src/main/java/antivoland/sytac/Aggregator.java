@@ -43,9 +43,6 @@ class Aggregator {
         return new PlatformWorker.Listener() {
             @Override
             public void onEvent(Event event) {
-                if (event.payload != null) {
-                    System.out.println(event.payload.user.date_of_birth);
-                }
                 view.registerEvent(event);
             }
 

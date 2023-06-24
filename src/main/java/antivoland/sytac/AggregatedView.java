@@ -13,10 +13,7 @@ import lombok.SneakyThrows;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -82,21 +79,18 @@ public class AggregatedView {
         String id;
         String name;
         int age;
-        final Map<String, Event> events = new HashMap<>();
+        final List<Event> events = new ArrayList<>();
         long successfulStreamingEvents;
 
         private void registerEvent(antivoland.sytac.Event event) {
-            var view = events.get(event.id);
-            if (view != null) return;
-            view = new Event()
+            events.add(new Event()
                     .setId(event.id)
                     .setName(event.name)
                     .setPlatform(event.platform)
                     .setShowTitle(event.payload.show.title)
                     .setShowCast1stName(event.payload.show.cast1stName())
                     .setShowId(event.payload.show.show_id)
-                    .setAmsterdamDatetime(event.payload.amsterdamDatetime());
-            events.put(view.id, view);
+                    .setAmsterdamDatetime(event.payload.amsterdamDatetime()));
         }
     }
 
