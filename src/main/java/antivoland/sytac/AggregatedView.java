@@ -90,7 +90,7 @@ public class AggregatedView {
                     .setShowTitle(event.payload.show.title)
                     .setShowCast1stName(event.payload.show.cast1stName())
                     .setShowId(event.payload.show.show_id)
-                    .setAmsterdamDatetime(event.payload.amsterdamDatetime()));
+                    .setCetDatetime(event.payload.cetDatetime()));
         }
     }
 
@@ -104,6 +104,6 @@ public class AggregatedView {
         String showCast1stName;
         String showId;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss.SSS")
-        LocalDateTime amsterdamDatetime;
+        LocalDateTime cetDatetime;
     }
 }

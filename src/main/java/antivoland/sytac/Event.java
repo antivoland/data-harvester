@@ -20,7 +20,7 @@ class Event {
     final static String SHOW_LIKED = "show-liked";
     final static String STREAM_INTERRUPTED = "stream-interrupted";
 
-    private static final ZoneId AMSTERDAM_TIMEZONE = ZoneId.of("Europe/Amsterdam");
+    private static final ZoneId CET_TIMEZONE = ZoneId.of("UTC+1");
 
     static boolean isSuccessfulStreamingEvent(Event a, Event b) {
         if (a == null || b == null) return false;
@@ -54,8 +54,8 @@ class Event {
             return user != null && user.isSytac();
         }
 
-        LocalDateTime amsterdamDatetime() {
-            return timestamp().atZone(AMSTERDAM_TIMEZONE).toLocalDateTime();
+        LocalDateTime cetDatetime() {
+            return timestamp().atZone(CET_TIMEZONE).toLocalDateTime();
         }
 
         Instant timestamp() {
@@ -65,12 +65,12 @@ class Event {
         ZoneId timezone() {
             return switch (user.country) {
                 case "PT" -> ZoneId.of("UTC");
-                case "CA" -> ZoneId.of("America/Toronto");
-                case "US" -> ZoneId.of("America/Los_Angeles");
-                case "RU" -> ZoneId.of("Europe/Moscow");
-                case "ID" -> ZoneId.of("Asia/Jakarta");
-                case "CN" -> ZoneId.of("Asia/Shanghai");
-                default -> AMSTERDAM_TIMEZONE;
+                case "CA" -> ZoneId.of("UTC-5");
+                case "US" -> ZoneId.of("UTC-8");
+                case "RU" -> ZoneId.of("UTC+3");
+                case "ID" -> ZoneId.of("UTC+7");
+                case "CN" -> ZoneId.of("UTC+8");
+                default -> CET_TIMEZONE;
             };
         }
     }

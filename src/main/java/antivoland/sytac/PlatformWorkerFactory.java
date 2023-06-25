@@ -1,7 +1,6 @@
 package antivoland.sytac;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 class PlatformWorkerFactory {
     private final ClientFactory clientFactory;
@@ -11,7 +10,7 @@ class PlatformWorkerFactory {
     }
 
     PlatformWorker newWorker(String platform, PlatformWorker.Listener listener) {
-        return new PlatformWorker(platform, clientFactory, listener);
+        return new PlatformWorker(clientFactory.spec(platform), new EventMapper(platform), listener);
     }
 
     List<PlatformWorker> newWorkers(List<String> platforms, PlatformWorker.Listener listener) {
