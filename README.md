@@ -4,7 +4,7 @@
 
 ## About
 
-We need to deal with [server sent events](https://en.wikipedia.org/wiki/Server-sent_events) produced by the [streaming platform](devcase-streaming-readme-main/StreamingPlatform.md).
+The full problem is described [here](devcase-streaming-readme-main/README.md). We need to deal with [server sent events](https://en.wikipedia.org/wiki/Server-sent_events) produced by the [streaming platform](devcase-streaming-readme-main/StreamingPlatform.md).
 
 I've decided to move on with a spring module using `io.projectreactor` [implementation](https://projectreactor.io/docs/core/release/reference/index.html) under the hood, because I wanted to end up with nice integration tests.
 
