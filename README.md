@@ -1,7 +1,33 @@
 # Data Harvester
 
+[![Build Status](https://github.com/Sytac-DevCase/Java-antivoland/workflows/build/badge.svg)](https://github.com/Sytac-DevCase/Java-antivoland/actions/workflows/build.yml)
+
+## About
+
 We need to deal with [server sent events](https://en.wikipedia.org/wiki/Server-sent_events) produced by the [streaming platform](devcase-streaming-readme-main/StreamingPlatform.md).
 
-https://projectreactor.io/docs/core/release/reference/index.html#_fallback_method
+I've decided to move on with a spring module using `io.projectreactor` [implementation](https://projectreactor.io/docs/core/release/reference/index.html) under the hood, because I wanted to end up with nice integration tests.
 
-At this stage I will pass the username and password required for authentication with the program arguments.
+## Usage
+
+Run the streaming platform as explained in the last section of the corresponding [document](devcase-streaming-readme-main/StreamingPlatform.md):
+
+> For Intel/AMD x64 based CPUs:
+> 
+> ```shell
+> docker run -p 8080:8080 sytacdocker/video-stream-server:latest
+> ```
+> 
+> For Arm based CPUs (Apple with M1/M2 chip):
+> 
+> ```shell
+> docker run -p 8080:8080 sytacdocker/video-stream-server-arm:latest
+> ```
+
+Then run the data harvester as follows, for instance:
+
+```shell
+mvn spring-boot:run -Dspring-boot.run.arguments="sytac 4p9g-Dv7T-u8fe-iz6y-SRW2"
+```
+
+The aggregation result serialized in JSON will be printed to standard output.
