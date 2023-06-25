@@ -10,15 +10,6 @@ class TestEvents {
     private static final String SSE_EVENT_DATETIME = "23-06-2023 12:34:56.789";
     private static final LocalDateTime EVENT_DATETIME = LocalDateTime.of(2023, 6, 23, 12, 34, 56, 789000000);
 
-    static ServerSentEvent<String> invalidSseEvent(int no, String name, String platform) {
-        return ServerSentEvent.
-                <String>builder()
-                .id(String.valueOf(no))
-                .event(name)
-                .data("🐶")
-                .build();
-    }
-
     @Builder(toBuilder = true)
     static class SseEventShow {
         String id;
@@ -33,10 +24,10 @@ class TestEvents {
         String country;
     }
 
-    static ServerSentEvent<String> sseEvent(int no, String name, SseEventShow show, SseEventUser user) {
+    static ServerSentEvent<String> sseEvent(String id, String name, SseEventShow show, SseEventUser user) {
         return ServerSentEvent.
                 <String>builder()
-                .id(String.valueOf(no))
+                .id(id)
                 .event(name)
                 .data(sseEventData(show, user))
                 .build();
@@ -85,10 +76,10 @@ class TestEvents {
                 user.country);
     }
 
-    static Event event(int no, String name, String platform, Event.Show show, Event.User user) {
+    static Event event(String id, String name, String platform, Event.Show show, Event.User user) {
         return Event
                 .builder()
-                .id(String.valueOf(no))
+                .id(id)
                 .name(name)
                 .platform(platform)
                 .payload(eventPayload(show, user))

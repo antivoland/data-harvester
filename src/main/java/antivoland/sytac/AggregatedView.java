@@ -1,13 +1,12 @@
 package antivoland.sytac;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 
 import java.time.LocalDate;
@@ -15,19 +14,16 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.*;
 
-@Data
-@NoArgsConstructor
 public class AggregatedView {
     private static final ObjectMapper MAPPER = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
+    @JsonProperty
     final Map<String, User> users = new HashMap<>();
-    @JsonIgnore
-    private final Set<String> showsReleasedIn2020OrLater = new HashSet<>();
+    @JsonProperty
     long runtimeDurationMillis;
-    @JsonIgnore
     private long sytflixStartedStreamEvents;
-    @JsonIgnore
     private long sytflixTotalEvents;
+    private final Set<String> showsReleasedIn2020OrLater = new HashSet<>();
 
     @JsonProperty
     double getSytflixPercentageOfStartedStreamEvents() {
@@ -65,44 +61,58 @@ public class AggregatedView {
     private User registerUser(antivoland.sytac.Event.User user) {
         var view = users.get(user.id);
         if (view != null) return view;
-        view = new User()
-                .setId(user.id)
-                .setName(user.first_name + " " + user.last_name)
-                .setAge(Period.between(user.date_of_birth, LocalDate.now()).getYears());
+        view = User.builder()
+                .id(user.id)
+                .name(user.first_name + " " + user.last_name)
+                .age(Period.between(user.date_of_birth, LocalDate.now()).getYears())
+                .build();
         users.put(view.id, view);
         return view;
     }
 
-    @Data
-    @NoArgsConstructor
+    @Builder
+    @EqualsAndHashCode
     static class User {
+        @JsonProperty
         String id;
+        @JsonProperty
         String name;
+        @JsonProperty
         int age;
+        @JsonProperty
         final List<Event> events = new ArrayList<>();
+        @JsonProperty
         long successfulStreamingEvents;
 
         private void registerEvent(antivoland.sytac.Event event) {
-            events.add(new Event()
-                    .setId(event.id)
-                    .setName(event.name)
-                    .setPlatform(event.platform)
-                    .setShowTitle(event.payload.show.title)
-                    .setShowCast1stName(event.payload.show.cast1stName())
-                    .setShowId(event.payload.show.show_id)
-                    .setCetDatetime(event.payload.cetDatetime()));
+            events.add(Event.builder()
+                    .id(event.id)
+                    .name(event.name)
+                    .platform(event.platform)
+                    .showTitle(event.payload.show.title)
+                    .showCast1stName(event.payload.show.cast1stName())
+                    .showId(event.payload.show.show_id)
+                    .cetDatetime(event.payload.cetDatetime())
+                    .build());
         }
     }
 
-    @Data
-    @NoArgsConstructor
+    @Builder
+    @EqualsAndHashCode
     static class Event {
+        @JsonProperty
         String id;
+        @JsonProperty
         String name;
+        @JsonProperty
         String platform;
+        @JsonProperty
         String showTitle;
+        @JsonProperty
         String showCast1stName;
+        @JsonProperty
         String showId;
+        @JsonProperty
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss.SSS")
         LocalDateTime cetDatetime;
     }

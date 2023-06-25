@@ -109,6 +109,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
+                    <mainClass>antivoland.sytac.DataHarvester</mainClass>
                     <executable>true</executable>
                 </configuration>
             </plugin>

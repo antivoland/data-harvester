@@ -16,12 +16,11 @@ public class DataHarvester implements CommandLineRunner {
         var clientFactory = new ClientFactory("http://localhost:8080", args[0], args[1]);
         var workerFactory = new PlatformWorkerFactory(clientFactory);
         var aggregator = new Aggregator(workerFactory);
-        var view = aggregator.aggregate(List.of("sytflix", "sytazon", "sysney"), 30000);
+        var view = aggregator.aggregate(List.of("sytflix", "sytazon", "sysney"), 20000);
         view.print();
     }
 
     public static void main(String[] args) {
-        // SpringApplication.run(DataHarvester.class, args);
         new SpringApplicationBuilder(DataHarvester.class).web(WebApplicationType.NONE).run(args);
     }
 }

@@ -29,6 +29,7 @@ class PlatformWorkerTest {
         workers.forEach(PlatformWorker::start);
         Thread.sleep(1000);
         workers.forEach(PlatformWorker::stop);
+
         assertThat(listener.events).hasSize(3 * TestEventSets.SIZE);
         assertThat(listener.events).containsAll(TestEventSets.events("sytflix"));
         assertThat(listener.events).containsAll(TestEventSets.events("sytazon"));

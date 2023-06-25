@@ -2,7 +2,7 @@ package antivoland.sytac;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.jackson.Jacksonized;
 
 import java.time.Instant;
@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
-@Data
 @Builder
 @Jacksonized
+@EqualsAndHashCode
 class Event {
     final static String STREAM_STARTED = "stream-started";
     final static String STREAM_FINISHED = "stream-finished";
@@ -41,9 +41,9 @@ class Event {
         return payload != null && payload.isSytacUser();
     }
 
-    @Data
     @Builder
     @Jacksonized
+    @EqualsAndHashCode
     static class Payload {
         Show show;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss.SSS")
@@ -75,9 +75,9 @@ class Event {
         }
     }
 
-    @Data
     @Builder
     @Jacksonized
+    @EqualsAndHashCode
     static class Show {
         String show_id;
         String cast;
@@ -100,9 +100,9 @@ class Event {
         }
     }
 
-    @Data
     @Builder
     @Jacksonized
+    @EqualsAndHashCode
     static class User {
         String id;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

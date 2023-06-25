@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,8 +14,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @EnableAutoConfiguration
 @SpringBootTest(classes = {TestController.class}, webEnvironment = RANDOM_PORT)
 class AggregatorTest {
-    static final LocalDateTime NOW = LocalDateTime.now();
-
     @LocalServerPort
     int port;
 
@@ -26,13 +23,14 @@ class AggregatorTest {
         var workerFactory = new PlatformWorkerFactory(clientFactory);
         var aggregator = new Aggregator(workerFactory);
         var view = aggregator.aggregate(List.of("sytflix", "sytazon", "sysney"), 1000);
+
         assertThat(view.users).containsOnlyKeys("john", "william", "sytac");
 
         var john = view.users.get("john");
         assertThat(john.id).isEqualTo("john");
         assertThat(john.name).isEqualTo("John john");
         assertThat(john.age).isGreaterThan(0);
-        assertThat(john.events).hasSize(24);
+        assertThat(john.events).hasSize(3 * 8);
         assertThat(john.successfulStreamingEvents).isEqualTo(3);
 
         var william = view.users.get("william");
@@ -49,7 +47,8 @@ class AggregatorTest {
         assertThat(sytac.events).hasSize(3);
         assertThat(sytac.successfulStreamingEvents).isEqualTo(0);
 
-        assertThat(view.getShowsReleasedIn2020OrLater()).isEqualTo(2);
+        assertThat(view.runtimeDurationMillis).isGreaterThan(0);
         assertThat(view.getSytflixPercentageOfStartedStreamEvents()).isCloseTo(0.4, offset(0.01));
+        assertThat(view.getShowsReleasedIn2020OrLater()).isEqualTo(2);
     }
 }

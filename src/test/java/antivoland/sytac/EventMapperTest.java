@@ -37,7 +37,7 @@ class EventMapperTest {
                                 .release_year(2023)
                                 .title("💥️")
                                 .type("Movie")
-                                .platform("whatever")
+                                .platform("Whatever")
                                 .build())
                         .event_date(LocalDateTime.of(2023, 6, 23, 12, 34, 56, 789000000))
                         .user(Event.User
@@ -100,7 +100,7 @@ class EventMapperTest {
                     "release_year": 2023,
                     "title": "💥️",
                     "type": "Movie",
-                    "platform": "whatever"
+                    "platform": "Whatever"
                   },
                   "event_date": "%s",
                   "user": {
