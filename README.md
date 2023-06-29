@@ -1,6 +1,6 @@
 # Data Harvester
 
-[![Build Status](https://github.com/Sytac-DevCase/Java-antivoland/workflows/build/badge.svg)](https://github.com/Sytac-DevCase/Java-antivoland/actions/workflows/build.yml)
+[![Build Status](https://github.com/antivoland/sytac-test/workflows/build/badge.svg)](https://github.com/antivoland/sytac-test/actions/workflows/build.yml)
 
 ## About
 
